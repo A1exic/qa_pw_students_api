@@ -1,4 +1,5 @@
-import { test } from '../../_fixtures/fixtures';
+import { test, expect } from '../../_fixtures/fixtures';
+import { SUCCESS_CODE } from '../../../src/api/constants/responceCodes';
 
 /*
 Preconditions:
@@ -19,10 +20,18 @@ let userId;
 test.beforeEach(async ({ todosAPI }) => {
   const response = await todosAPI.getAllTodos();
 
-  await todosAPI.assertSuccessResponseCode(response);
+  expect(todosAPI.parseStatus(response)).toEqual(SUCCESS_CODE);
 
   const body = await todosAPI.parseBody(response);
+
+  expect(body.length).toBeGreaterThan(0);
+
   const completedTodo = body.find(todo => todo.completed === true);
+
+  expect(
+    completedTodo,
+    'Expected at least one completed todo in the response',
+  ).toBeDefined();
 
   userId = completedTodo.userId;
 });
@@ -30,7 +39,11 @@ test.beforeEach(async ({ todosAPI }) => {
 test('GET completed todos by existing userId', async ({ todosAPI }) => {
   const response = await todosAPI.getTodosForUserByCompleted(userId, true);
 
-  await todosAPI.assertSuccessResponseCode(response);
-  await todosAPI.assertUserIdIsCorrect(response, userId);
-  await todosAPI.assertCompletedIsCorrect(response, true);
+  expect(todosAPI.parseStatus(response)).toEqual(SUCCESS_CODE);
+
+  const body = await todosAPI.parseBody(response);
+
+  expect(body.length).toBeGreaterThan(0);
+  expect(body[0].userId).toEqual(userId);
+  expect(body[0].completed).toEqual(true);
 });
