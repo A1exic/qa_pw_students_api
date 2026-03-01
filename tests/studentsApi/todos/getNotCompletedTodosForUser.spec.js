@@ -44,6 +44,9 @@ test('GET not completed todos by existing userId', async ({ todosAPI }) => {
   const body = await todosAPI.parseBody(response);
 
   expect(body.length).toBeGreaterThan(0);
-  expect(body[0].userId).toEqual(userId);
-  expect(body[0].completed).toEqual(false);
+
+  body.forEach(todo => {
+    expect(todo.userId).toEqual(userId);
+    expect(todo.completed).toEqual(false);
+  });
 });
